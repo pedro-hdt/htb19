@@ -39,6 +39,14 @@ def pretty_json(data):
 
      return json.dumps(data, indent=4, separators=(',', ': '))
 
+def auction():
+    listen=True
+    while (listen):
+        if listen(SOCKET)["type"]=="auction":
+             listen=False
+             token=listen(SOCKET)["token"]
+
+    speak(SOCKET)
 
 def play():
     # Game ends when the response message has type=summary
