@@ -43,17 +43,33 @@ def auction():
     l=True
     while (l):
         received=listen(SOCKET)
-        print(pretty_json(received))
+        print("a "+ pretty_json(received))
         if received["type"]=="auction":
              l=False
              token=received["token"]
         elif received["type"]=="auction_result":
-                return received
+                return
 
-    msg=json.dumps({'type':'auction_response', 'token':token})
+    msg=json.dumps({'type':'auction_response', 'token':token, 'superPower':"seer", "bid":30})
 
     speak(SOCKET, msg)
     auction()
+
+def status():
+    received=listen(SOCKET)
+    if received["type"]=="status":
+        print("status: "+ pretty_json(received))
+    elif received["type"]=="bet":
+        token=received["token"]
+        msg = json.dumps({'type':'bet_response', 'token':token, 'action':'call', 'useReserve':False})
+        speak(SOCKET, msg)
+    elif received["type"]=="summary":
+        print("summary: " + pretty_json(received))
+        return
+
+    status()
+
+
 
 def play():
     # Game ends when the response message has type=summary
@@ -70,5 +86,6 @@ if __name__ == '__main__':
     SOCKET.connect((TCP_IP, TCP_PORT))
 
     print(pretty_json(login()))
-    print(pretty_json(auction()))
+    auction()
+    status()
     SOCKET.close()
