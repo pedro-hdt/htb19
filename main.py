@@ -56,17 +56,30 @@ def auction():
 
 
 def status():
+    received=listen(SOCKET)
 
-    received = listen(SOCKET)
-    if received["type"] == "status":
-        print("status: " + pretty_json(received))
-    elif received["type"] == "bet":
-        token = received["token"]
-        msg = {'type': 'bet_response', 'token': token, 'action': 'call', 'useReserve': False}
+    while(received["type"]=="status"):
+        print("status: "+ pretty_json(received))
+        received=listen(SOCKET)
+
+    if received["type"]=="bet":
+        token=received["token"]
+        msg ={'type':'bet_response', 'token':token, 'action':'raise','stake':10, 'useReserve':False}
         speak(SOCKET, msg)
-    elif received["type"] == "summary":
+        if msg["action"] in ['seer', 'spy', 'leech']:
+            print("super power: "+ pretty_json(listen(SOCKET)))
+
+    elif received["type"]=="folded":
+            print("folded: " + pretty_json(received))
+
+    elif received["type"]=="bankrupt":
+            print("bankrupt: " + pretty_json(received))
+
+    elif received["type"]=="summary":
         print("summary: " + pretty_json(received))
         return
+
+    else: print("SHIT" + received["type"])
 
     status()
 
