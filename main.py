@@ -42,12 +42,16 @@ def pretty_json(data):
 
 def play():
     # Game ends when the response message has type=summary
-    return
+
+    auction()
+
+    bet()
 
 
 
 
 if __name__ == '__main__':
+
     SOCKET.connect((TCP_IP, TCP_PORT))
 
     print(pretty_json(login()))
