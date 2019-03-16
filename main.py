@@ -9,6 +9,7 @@ SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 """Sends the given message to the game server"""
 def speak(socket, msg):
+    msg=json.dumps(msg)
     encoded_msg = bytearray(len(msg).to_bytes(4, "little")) + bytearray(msg, 'utf-8')
     socket.send(encoded_msg)
 
@@ -61,8 +62,10 @@ def status():
         print("status: "+ pretty_json(received))
     elif received["type"]=="bet":
         token=received["token"]
-        msg = json.dumps({'type':'bet_response', 'token':token, 'action':'call', 'useReserve':False})
+        msg ={'type':'bet_response', 'token':token, 'action':'seer', 'useReserve':False}
         speak(SOCKET, msg)
+        if msg["action"] in ['seer', 'spy', 'leech']:
+            print("super power: "+ pretty_json(received))
     elif received["type"]=="summary":
         print("summary: " + pretty_json(received))
         return
