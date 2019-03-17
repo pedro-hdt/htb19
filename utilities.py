@@ -1,6 +1,5 @@
 class Card:
     rank, suit = "", ""
-
     def __init__(self, suit, rank):
         self.suit = suit
         self.rank = rank
@@ -9,7 +8,6 @@ class Card:
 
 rankDictionary = {'2':0, '3':1, '4':2, '5':3, '6':4, '7':5, '8':6, '9':7, '10':8, 'jack':9, 'queen':10, 'king':11, 'ace':12}
 suitDictionary = {'spades':0, 'hearts':1, 'diamonds':2, 'clubs':3}
-
 
 def inList(newCard, cards):
     result = False
@@ -106,8 +104,40 @@ def computeHand(allCards):
             return 'highCard', index, None
         index += -1
 
+def preFlop(pockets, blind, can_check):
 
-def flop(cardsSeen):
+    if pockets[0].rank == pockets[1].rank and pockets[0].rank>=8:
+        return 'raise', blind*2
+
+    elif can_check:
+        return 'check', None
+
+    elif sum(pockets[0].rank, pockets[1].rank)>=18 or pockets[0].rank == pockets[1].rank:
+         return 'call', None
+
+    return 'fold', None
+
+def handStrength(probabilities):
+   _sum = 0
+   for key in probabilities.keys():
+       if key == 'royalFlush' or key == 'straightFlush' or key == 'fourOfAKind' or key == 'fullHouse':
+           _sum += 1 * probabilities[key]
+       elif key == 'flush' or key == 'straight':
+           _sum += 0.95 * probabilities[key]
+       elif key == 'threeOfAKind' or key == ' twoPair':
+           _sum += 0.9 * probabilities[key]
+       elif key == 'onePair':
+           _sum += 0.65 * probabilities[key]
+       else:
+           _sum += 0.2 * probabilities[key]
+   return _sum
+
+def foldRate(bet, pot):
+   return bet / (bet + pot)
+
+
+
+def flop(cardsSeen,can_check):
     outcomes = dict({'highCard': 0, 'onePair': 0, 'twoPair': 0, 'threeOfAKind': 0, 'straight': 0,
                      'flush': 0, 'fullHouse': 0, 'fourOfAKind': 0, 'straightFlush': 0, 'royalFlush': 0})
 
@@ -129,7 +159,24 @@ def flop(cardsSeen):
         total += outcomes[outcome]
 
     for outcome in outcomes.keys():
-        print(str(outcome) + ' with probability ' + str(outcomes[outcome] / total))
+        outcomes[outcome] /= total
+
+    return(strengthtoAction(handStrength(outcomes))
+
+
+def strengthtoAction(strength):
+
+    if strength>=0.8:
+        return 'raise', blind*2
+
+    elif can_check:
+        return 'check', None
+
+    elif strength in range (0.5, 0.8):
+         return 'call', None
+
+    return 'fold', None
+
 
 
 def turn(cardsSeen):
@@ -149,4 +196,6 @@ def turn(cardsSeen):
         total += outcomes[outcome]
 
     for outcome in outcomes.keys():
-        print(str(outcome) + ' with probability ' + str(outcomes[outcome] / total))
+        outcomes[outcome] /= total
+
+    return(strengthtoAction(handStrength(outcomes))
