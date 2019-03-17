@@ -1,5 +1,6 @@
 import json
 import socket
+import utilites
 
 
 # Server details
@@ -55,6 +56,13 @@ def auction():
     auction()
 
 
+def make_decision():
+
+    if
+
+    pass
+
+
 def status():
     received=listen(SOCKET)
 
@@ -64,7 +72,11 @@ def status():
 
     if received["type"]=="bet":
         token=received["token"]
-        msg ={'type':'bet_response', 'token':token, 'action':'raise','stake':10, 'useReserve':False}
+        decision, stake = make_decision()
+        if stake:
+            msg = {'type':'bet_response', 'token':token, 'action':decision, 'stake':stake, 'useReserve':False}
+        else:
+            msg = {'type':'bet_response', 'token':token, 'action':decision, 'useReserve':False}
         speak(SOCKET, msg)
         if msg["action"] in ['seer', 'spy', 'leech']:
             print("super power: "+ pretty_json(listen(SOCKET)))
