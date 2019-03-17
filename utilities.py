@@ -108,8 +108,40 @@ def computeHand(allCards):
             return 'highCard', index, None
         index += -1
 
+def preFlop(pockets, blind, can_check):
 
-def flop(cardsSeen):
+    if pockets[0].rank == pockets[1].rank and pockets[0].rank>=8:
+        return 'raise', blind*2
+
+    elif can_check:
+        return 'check', None
+
+    elif sum(pockets[0].rank, pockets[1].rank)>=18 or pockets[0].rank == pockets[1].rank:
+         return 'call', None
+
+    return 'fold', None
+
+def handStrength(probabilities):
+   _sum = 0
+   for key in probabilities.keys():
+       if key == 'royalFlush' or key == 'straightFlush' or key == 'fourOfAKind' or key == 'fullHouse':
+           _sum += 1 * probabilities[key]
+       elif key == 'flush' or key == 'straight':
+           _sum += 0.95 * probabilities[key]
+       elif key == 'threeOfAKind' or key == ' twoPair':
+           _sum += 0.9 * probabilities[key]
+       elif key == 'onePair':
+           _sum += 0.65 * probabilities[key]
+       else:
+           _sum += 0.2 * probabilities[key]
+   return _sum
+
+def foldRate(bet, pot):
+   return bet / (bet + pot)
+
+
+
+def flop(cardsSeen,can_check):
     outcomes = dict({'highCard': 0, 'onePair': 0, 'twoPair': 0, 'threeOfAKind': 0, 'straight': 0,
                      'flush': 0, 'fullHouse': 0, 'fourOfAKind': 0, 'straightFlush': 0, 'royalFlush': 0})
 
@@ -131,7 +163,24 @@ def flop(cardsSeen):
         total += outcomes[outcome]
 
     for outcome in outcomes.keys():
-        print(str(outcome) + ' with probability ' + str(outcomes[outcome] / total))
+        outcomes[outcome] /= total
+
+    return(strengthtoAction(handStrength(outcomes)))
+
+
+def strengthtoAction(strength, blind, can_check):
+
+    if strength>=0.8:
+        return 'raise', blind*2
+
+    elif can_check:
+        return 'check', None
+
+    elif strength in range (0.5, 0.8):
+         return 'call', None
+
+    return 'fold', None
+
 
 
 def turn(cardsSeen):
@@ -151,37 +200,7 @@ def turn(cardsSeen):
         total += outcomes[outcome]
 
     for outcome in outcomes.keys():
-        print(str(outcome) + ' with probability ' + str(outcomes[outcome] / total))
+        outcomes[outcome] /= total
 
+    return(strengthtoAction(handStrength(outcomes)))
 
-
-def determine_action(status1, status2):
-    """Given 2 statuses, returns the player and the action performed between them"""
-    curr_player = status1['currentPlayer']
-    curr_stake = status1['stake']
-
-    for player in status2['activePlayers']:
-
-        if player['playerId'] == curr_player:
-
-            # Was there a fold?
-            if player['folded']:
-                return curr_player, 'fold'
-
-            # Was there a call?
-            new_stake = player['stake']
-            if new_stake == curr_stake:
-                return curr_player, 'call'
-
-            # Was there a raise?
-            else:
-                return curr_player, 'raise'
-
-
-def can_check(status):
-    """Returns whether we can check (in which case we cannot call)"""
-    for player in status['activePlayers']:
-
-        if player['playerId'] == status['currentPlayer']:
-
-            return status['stake'] == player['stake']
