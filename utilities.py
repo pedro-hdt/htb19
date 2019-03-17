@@ -8,6 +8,7 @@ class Card:
 
 rankDictionary = {'2':0, '3':1, '4':2, '5':3, '6':4, '7':5, '8':6, '9':7, '10':8, 'jack':9, 'queen':10, 'king':11, 'ace':12}
 suitDictionary = {'spades':0, 'hearts':1, 'diamonds':2, 'clubs':3}
+superPowersDictionary ={'seer':1, 'spy':2, 'leech':3, 'null':0}
 
 def inList(newCard, cards):
     result = False
@@ -200,3 +201,63 @@ def turn(cardsSeen):
         outcomes[outcome] /= total
 
     return(handStrength(outcomes))
+
+
+def turnOpponent(cardsSeen, ourPocketCards):
+   outcomes = dict({'highCard':0, 'onePair':0, 'twoPair':0, 'threeOfAKind':0, 'straight':0,
+                    'flush':0, 'fullHouse':0, 'fourOfAKind':0, 'straightFlush':0, 'royalFlush':0})
+
+   for rank1 in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']:
+       for suit1 in ['hearts', 'clubs', 'spades', 'diamonds']:
+           card1 = Card(suit1, rank1)
+           if not inList(card1, cardsSeen) and not inList(card1, ourPocketCards) :
+               l1Cards = cardsSeen + [card1]
+               for rank2 in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']:
+                   for suit2 in ['hearts', 'clubs', 'spades', 'diamonds']:
+                       card2 = Card(suit2, rank2)
+                       if not inList(card2, l1Cards) and not inList(card2, ourPocketCards):
+                           l2Cards = l1Cards + [card2]
+                           outcome, _, __ = computeHand(l2Cards)
+                           outcomes[outcome] += 1
+
+
+   total = 0
+   for outcome in outcomes.keys():
+       total += outcomes[outcome]
+
+   for outcome in outcomes.keys():
+       outcomes[outcome] /= total
+
+   return outcomes
+
+def flopOpponent(cardsSeen, ourPocketCards):
+   outcomes = dict({'highCard':0, 'onePair':0, 'twoPair':0, 'threeOfAKind':0, 'straight':0,
+                    'flush':0, 'fullHouse':0, 'fourOfAKind':0, 'straightFlush':0, 'royalFlush':0})
+
+   for rank1 in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']:
+       for suit1 in ['hearts', 'clubs', 'spades', 'diamonds']:
+           card1 = Card(suit1, rank1)
+           if not inList(card1, cardsSeen) and not inList(card1, ourPocketCards):
+               l1Cards = cardsSeen + [card1]
+               for rank2 in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']:
+                   for suit2 in ['hearts', 'clubs', 'spades', 'diamonds']:
+                       card2 = Card(suit2, rank2)
+                       if not inList(card2, l1Cards) and not inList(card2, ourPocketCards):
+                           l2Cards = l1Cards + [card2]
+                           for rank3 in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']:
+                               for suit3 in ['hearts', 'clubs', 'spades', 'diamonds']:
+                                   card3 = Card(suit3, rank3)
+                                   if not inList(card3, l2Cards) and not inList(card3, ourPocketCards):
+                                       l3Cards = l2Cards + [card3]
+                                       outcome, _, __ = computeHand(l3Cards)
+                                       outcomes[outcome] += 1
+
+
+   total = 0
+   for outcome in outcomes.keys():
+       total += outcomes[outcome]
+
+   for outcome in outcomes.keys():
+       outcomes[outcome] /= total
+
+   return outcomes
