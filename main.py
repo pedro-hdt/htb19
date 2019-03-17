@@ -63,7 +63,7 @@ def auction(past_auctions, bids):
             l = False
             token = received["token"]
         elif received["type"] == "auction_result":
-            #past_auctions.append(received["superPower"])
+            past_auctions.append(received["superPower"])
             return
 
     auction_param = {'type': 'auction_response', 'token': token, 'superPower': superPower, "bid": bid}
