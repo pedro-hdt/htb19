@@ -1,7 +1,7 @@
 import json
 import socket
-import utilities as util
-
+from utilities import *
+from aux import *
 
 # Server details
 TCP_IP = '35.197.236.148'
@@ -50,7 +50,7 @@ def auction():
         elif received["type"] == "auction_result":
             return
 
-    auction_param = {'type': 'auction_response', 'token': token, 'superPower': "seer", "bid": 30}
+    auction_param = {'type': 'auction_response', 'token': token, 'superPower': "seer", "bid": 1}
 
     speak(SOCKET, auction_param)
     auction()
@@ -58,34 +58,40 @@ def auction():
 
 def make_decision(status):
 
-    can_check = util.can_check(status)
+    cancheck = can_check(status)
     pocket = status['pocketCards']
     blind = status['blind']
 
     cards = list()
-    cards.append(util.Card(pocket[0]['suit'], pocket[0]['rank']))
-    cards.append(util.Card(pocket[1]['suit'], pocket[1]['rank']))
+    cards.append(Card(pocket[0]['suit'], pocket[0]['rank']))
+    cards.append(Card(pocket[1]['suit'], pocket[1]['rank']))
 
     community_cards = status['communityCards']
     stage = len(community_cards)  # how many community cards
     for card in community_cards:
-        cards.append(util.Card(card['suit'], card['rank']))
+        cards.append(Card(card['suit'], card['rank']))
 
     # Pre-flop
     if stage == 0:
-        return util.preflop(cards, 2*blind, can_check)
+        return preflop(cards, 2*blind, cancheck)
 
     # flop
     if stage == 3:
-        return util.flop(cards, can_check)
+        flopStrength= flop(cards)
+        print("STRENGTH: "+str(flopStrength))
+        return strengthtoAction(flopStrength, blind, cancheck)
 
     # turn
     if stage == 4:
-        return util.turn()
+        turnStrength=turn(cards)
+        print("STRENGTH: "+ str(turnStrength))
+        return strengthtoAction(turnStrength, blind, cancheck)
 
     # river
     if stage == 5:
-        return util.river()
+        riverStrength=handStrength({computeHand(cards): 1})
+        print("STRENGTH: "+str(riverStrength))
+        return strengthtoAction(riverStrength, blind, cancheck)
 
 
 def status():
@@ -99,6 +105,7 @@ def status():
     if received["type"]=="bet":
         token=received["token"]
         decision, stake = make_decision(last_status)
+        print("DECISION: "+ decision)
         if stake:
             msg = {'type':'bet_response', 'token':token, 'action':decision, 'stake':stake, 'useReserve':False}
         else:
@@ -128,4 +135,5 @@ if __name__ == '__main__':
     print(pretty_json(login()))
     auction()
     status()
+    #print(preflop([Card( 'spades','queen'), Card( 'hearts','queen')], 2.0, True ))
     SOCKET.close()
