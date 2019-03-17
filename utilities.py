@@ -1,5 +1,6 @@
 class Card:
     rank, suit = "", ""
+
     def __init__(self, suit, rank):
         self.suit = suit
         self.rank = rank
@@ -8,6 +9,7 @@ class Card:
 
 rankDictionary = {'2':0, '3':1, '4':2, '5':3, '6':4, '7':5, '8':6, '9':7, '10':8, 'jack':9, 'queen':10, 'king':11, 'ace':12}
 suitDictionary = {'spades':0, 'hearts':1, 'diamonds':2, 'clubs':3}
+
 
 def inList(newCard, cards):
     result = False
