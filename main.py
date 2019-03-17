@@ -91,8 +91,6 @@ def status():
         print("summary: " + pretty_json(received))
         return
 
-    else: print("SHIT" + received["type"])
-
     status()
 
 
