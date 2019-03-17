@@ -1,6 +1,6 @@
 import json
 import socket
-import utilites
+import utilities as util
 
 
 # Server details
@@ -56,23 +56,49 @@ def auction():
     auction()
 
 
-def make_decision():
+def make_decision(status):
 
-    if
+    can_check = util.can_check(status)
+    pocket = status['pocketCards']
+    blind = status['blind']
 
-    pass
+    cards = list()
+    cards.append(util.Card(pocket[0]['suit'], pocket[0]['rank']))
+    cards.append(util.Card(pocket[1]['suit'], pocket[1]['rank']))
+
+    community_cards = status['communityCards']
+    stage = len(community_cards)  # how many community cards
+    for card in community_cards:
+        cards.append(util.Card(card['suit'], card['rank']))
+
+    # Pre-flop
+    if stage == 0:
+        return util.preflop(cards, 2*blind, can_check)
+
+    # flop
+    if stage == 3:
+        return util.flop(cards, can_check)
+
+    # turn
+    if stage == 4:
+        return util.turn()
+
+    # river
+    if stage == 5:
+        return util.river()
 
 
 def status():
     received=listen(SOCKET)
 
     while(received["type"]=="status"):
+        last_status = received
         print("status: "+ pretty_json(received))
         received=listen(SOCKET)
 
     if received["type"]=="bet":
         token=received["token"]
-        decision, stake = make_decision()
+        decision, stake = make_decision(last_status)
         if stake:
             msg = {'type':'bet_response', 'token':token, 'action':decision, 'stake':stake, 'useReserve':False}
         else:
